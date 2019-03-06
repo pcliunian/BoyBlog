@@ -1,4 +1,6 @@
- **OneBlog** 一个简洁美观、功能强大并且自适应的Java博客。使用springboot开发，前端使用Bootstrap。支持移动端自适应，配有完备的前台和后台管理功能。    
+该项目摘自码云：https://gitee.com/yadong.zhang/DBlog.git
+原创作者：https://gitee.com/yadong.zhang/DBlog
+是一个简洁美观、功能强大并且自适应的Java博客。使用springboot开发，前端使用Bootstrap。支持移动端自适应，配有完备的前台和后台管理功能。    
 
 ![JDK](https://img.shields.io/badge/JDK-1.8-green.svg)
 ![Maven](https://img.shields.io/badge/Maven-3.3.1-green.svg)
