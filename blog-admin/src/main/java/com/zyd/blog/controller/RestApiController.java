@@ -1,14 +1,15 @@
 package com.zyd.blog.controller;
 
 import com.zyd.blog.business.annotation.BussinessLog;
-import com.zyd.blog.business.entity.Config;
-import com.zyd.blog.business.enums.QiniuUploadType;
+import com.zyd.blog.business.enums.FileUploadType;
 import com.zyd.blog.business.service.BizArticleService;
 import com.zyd.blog.business.service.SysConfigService;
 import com.zyd.blog.core.websocket.server.ZydWebsocketServer;
 import com.zyd.blog.core.websocket.util.WebSocketUtil;
+import com.zyd.blog.file.FileUploader;
+import com.zyd.blog.file.entity.VirtualFile;
 import com.zyd.blog.framework.object.ResponseVO;
-import com.zyd.blog.util.FileUtil;
+import com.zyd.blog.plugin.file.GlobalFileUploader;
 import com.zyd.blog.util.ResultUtil;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,40 +43,26 @@ public class RestApiController {
     @Autowired
     private ZydWebsocketServer websocketServer;
 
-    /**
-     * 上传文件到七牛云
-     *
-     * @param file
-     * @return
-     */
+    @BussinessLog("wangEditor编辑器中上传文件")
     @RequiresPermissions("article:publish")
-    @PostMapping("/upload2Qiniu")
-    public ResponseVO upload2Qiniu(@RequestParam("file") MultipartFile file) {
-        String filePath = FileUtil.uploadToQiniu(file, QiniuUploadType.SIMPLE, false);
-        return ResultUtil.success("图片上传成功", filePath);
+    @PostMapping("/uploadFile")
+    public ResponseVO uploadFile(@RequestParam("file") MultipartFile file) {
+        FileUploader uploader = new GlobalFileUploader();
+        VirtualFile virtualFile = uploader.upload(file, FileUploadType.SIMPLE.getPath(), true);
+        return ResultUtil.success("图片上传成功", virtualFile.getFullFilePath());
     }
 
+    @BussinessLog("simpleMD编辑器中上传文件")
     @RequiresPermissions("article:publish")
-    @PostMapping("/upload2QiniuForMd")
-    public Object upload2QiniuForMd(@RequestParam("file") MultipartFile file) {
-        String filePath = FileUtil.uploadToQiniu(file, QiniuUploadType.SIMPLE, false);
-        Config config = configService.get();
+    @PostMapping("/uploadFileForMd")
+    public Object uploadFileForMd(@RequestParam("file") MultipartFile file) {
+        FileUploader uploader = new GlobalFileUploader();
+        VirtualFile virtualFile = uploader.upload(file, FileUploadType.SIMPLE.getPath(), true);
         Map<String, Object> resultMap = new HashMap<>(3);
         resultMap.put("success", 1);
         resultMap.put("message", "上传成功");
-        resultMap.put("filename", config.getQiuniuBasePath() + filePath);
+        resultMap.put("filename", virtualFile.getFullFilePath());
         return resultMap;
-    }
-
-    /**
-     * 发布文章选择图片时获取素材库
-     *
-     * @return
-     */
-    @RequiresPermissions("article:publish")
-    @PostMapping("/material")
-    public ResponseVO material() {
-        return ResultUtil.success("", articleService.listMaterial());
     }
 
     /**
@@ -85,9 +72,9 @@ public class RestApiController {
      */
     @RequiresPermissions("notice")
     @PostMapping("/notice")
-    @BussinessLog("通过websocket向前台用户发送通知")
+    @BussinessLog("通过websocket向前台发送通知")
     public ResponseVO notice(String msg) throws UnsupportedEncodingException {
         WebSocketUtil.sendNotificationMsg(msg, websocketServer.getOnlineUsers());
-        return ResultUtil.success("消息发送成功", articleService.listMaterial());
+        return ResultUtil.success("消息发送成功");
     }
 }

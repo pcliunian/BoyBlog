@@ -1,12 +1,12 @@
 package com.zyd.blog.controller;
 
+import cn.hutool.core.date.DateUtil;
 import com.zyd.blog.business.annotation.BussinessLog;
 import com.zyd.blog.business.consts.DateConst;
 import com.zyd.blog.business.service.RemoverService;
 import com.zyd.blog.framework.object.ResponseVO;
-import com.zyd.blog.spider.model.BaseModel;
-import com.zyd.blog.util.DateUtil;
 import com.zyd.blog.util.ResultUtil;
+import me.zhyd.hunter.config.HunterConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,8 +36,8 @@ public class RestRemoverController {
     @PostMapping("/run")
     @ResponseBody
     @BussinessLog("运行文章搬运工")
-    public void run(Long typeId, BaseModel model, HttpServletResponse response) throws IOException, InterruptedException {
-        removerService.run(typeId, model, response.getWriter());
+    public void run(Long typeId, HunterConfig config, HttpServletResponse response) throws IOException, InterruptedException {
+        removerService.run(typeId, config, response.getWriter());
     }
 
     @PostMapping("/stop")
@@ -49,7 +49,14 @@ public class RestRemoverController {
         } catch (Exception e) {
             return ResultUtil.error(e.getMessage());
         }
-        return ResultUtil.success("程序已停止运行，当前时间 " + DateUtil.date2Str(new Date(), DateConst.YYYY_MM_DD_HH_MM_SS_EN));
+        return ResultUtil.success("程序已停止运行，当前时间 " + DateUtil.format(new Date(), DateConst.YYYY_MM_DD_HH_MM_SS_EN));
+    }
+
+    @PostMapping("/single")
+    @ResponseBody
+    @BussinessLog("抓取单个文章")
+    public void single(Long typeId, String[] url, boolean convertImg, HttpServletResponse response) throws IOException, InterruptedException {
+        removerService.crawlSingle(typeId, url, convertImg, response.getWriter());
     }
 
 }

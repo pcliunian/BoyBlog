@@ -13,9 +13,12 @@ package com.zyd.blog.controller;
 import com.zyd.blog.business.annotation.BussinessLog;
 import com.zyd.blog.business.entity.Article;
 import com.zyd.blog.business.service.BizArticleService;
+import com.zyd.blog.business.service.SysConfigService;
 import com.zyd.blog.core.websocket.server.ZydWebsocketServer;
-import com.zyd.blog.spider.enums.ExitWayEnum;
 import com.zyd.blog.util.ResultUtil;
+import me.zhyd.hunter.config.HunterConfigTemplate;
+import me.zhyd.hunter.config.platform.Platform;
+import me.zhyd.hunter.enums.ExitWayEnum;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -41,6 +44,8 @@ public class RenderController {
 
     @Autowired
     private BizArticleService articleService;
+    @Autowired
+    private SysConfigService configService;
     @Autowired
     private ZydWebsocketServer websocketServer;
 
@@ -165,14 +170,21 @@ public class RenderController {
     @BussinessLog(value = "进入icons页")
     @GetMapping("/icons")
     public ModelAndView icons(Model model) {
-        return ResultUtil.view("icons");
+        return ResultUtil.view("other/icons");
     }
 
     @RequiresPermissions("shiro")
     @BussinessLog(value = "进入shiro示例页")
     @GetMapping("/shiro")
     public ModelAndView shiro(Model model) {
-        return ResultUtil.view("shiro");
+        return ResultUtil.view("other/shiro");
+    }
+
+    @RequiresUser
+    @BussinessLog("进入编辑器测试用例页面")
+    @GetMapping("/editor")
+    public ModelAndView editor(Model model) {
+        return ResultUtil.view("other/editor");
     }
 
     @RequiresPermissions("notice")
@@ -180,7 +192,7 @@ public class RenderController {
     @GetMapping("/notice")
     public ModelAndView notice(Model model) {
         model.addAttribute("online", websocketServer.getOnlineUserCount());
-        return ResultUtil.view("notification");
+        return ResultUtil.view("laboratory/notification");
     }
 
     @RequiresUser
@@ -188,6 +200,15 @@ public class RenderController {
     @GetMapping("/remover")
     public ModelAndView remover(Model model) {
         model.addAttribute("exitWayList", ExitWayEnum.values());
-        return ResultUtil.view("remover/list");
+        model.addAttribute("spiderConfig", HunterConfigTemplate.configTemplate.toJSONString());
+        model.addAttribute("platforms", Platform.values());
+        return ResultUtil.view("laboratory/remover");
+    }
+
+    @RequiresPermissions("files")
+    @BussinessLog("进入文件管理页面")
+    @GetMapping("/files")
+    public ModelAndView files(Model model) {
+        return ResultUtil.view("file/list");
     }
 }

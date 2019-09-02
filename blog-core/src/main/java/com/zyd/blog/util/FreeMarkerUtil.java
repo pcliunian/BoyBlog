@@ -39,10 +39,8 @@ public class FreeMarkerUtil {
     /**
      * Template to String Method Note
      *
-     * @param templateContent
-     *         template content
-     * @param map
-     *         tempate data map
+     * @param templateContent template content
+     * @param map             tempate data map
      * @return
      */
     public static String template2String(String templateContent, Map<String, Object> map,
@@ -62,9 +60,7 @@ public class FreeMarkerUtil {
                 if (o != null) {
                     if (o instanceof String) {
                         String value = o.toString();
-                        if (value != null) {
-                            value = value.trim();
-                        }
+                        value = value.trim();
                         if (isNeedFilter) {
                             value = filterXmlString(value);
                         }
@@ -77,7 +73,10 @@ public class FreeMarkerUtil {
         }
         Template t = null;
         try {
-            t = new Template("", new StringReader(templateContent), new Configuration());
+            // 设定freemarker对数值的格式化
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+            cfg.setNumberFormat("#");
+            t = new Template("", new StringReader(templateContent), cfg);
             StringWriter writer = new StringWriter();
             t.process(newMap, writer);
             return writer.toString();
@@ -86,15 +85,16 @@ public class FreeMarkerUtil {
         } catch (TemplateException e) {
             log.error("TemplateUtil -> template2String TemplateException.", e);
         } finally {
-            if (newMap != null) {
-                newMap.clear();
-                newMap = null;
-            }
+            newMap.clear();
+            newMap = null;
         }
         return null;
     }
 
-    protected static String filterXmlString(String str) {
+    private static String filterXmlString(String str) {
+        if (null == str) {
+            return null;
+        }
         str = str.replaceAll(LT, LT_CHAR);
         str = str.replaceAll(GT, GT_CHAR);
         str = str.replaceAll(AMP, AMP_CHAR);

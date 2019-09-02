@@ -1,7 +1,11 @@
 package com.zyd.blog.business.util;
 
-import com.zyd.blog.business.enums.QiniuUploadType;
-import com.zyd.blog.plugin.QiniuApi;
+import com.zyd.blog.business.enums.FileUploadType;
+import com.zyd.blog.file.FileUploader;
+import com.zyd.blog.file.entity.VirtualFile;
+import com.zyd.blog.file.exception.GlobalFileException;
+import com.zyd.blog.file.util.FileUtil;
+import com.zyd.blog.plugin.file.GlobalFileUploader;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -9,41 +13,30 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.UUID;
 
 @Slf4j
 public class ImageDownloadUtil {
 
     /**
-     * 将网络图片转存到七牛云
+     * 将网络图片转存到云存储中
      *
      * @param imgUrl  网络图片地址
      * @param referer 为了预防某些网站做了权限验证，不加referer可能会403
      */
-    public static String convertToQiniu(String imgUrl, String referer) {
+    public static String saveToCloudStorage(String imgUrl, String referer) {
         log.debug("download img >> %s", imgUrl);
-        String qiniuImgPath = null;
-        try (InputStream is = getInputStreamByUrl(imgUrl, referer);
-             ByteArrayOutputStream outStream = new ByteArrayOutputStream();) {
-            byte[] buffer = new byte[1024];
-            int len = 0;
-            while ((len = is.read(buffer)) != -1) {
-                outStream.write(buffer, 0, len);
-            }
-            qiniuImgPath = QiniuApi.getInstance()
-                    .withFileName("temp." + getSuffixByUrl(imgUrl), QiniuUploadType.SIMPLE)
-                    .upload(outStream.toByteArray());
+        String res = null;
+        try (InputStream is = getInputStreamByUrl(imgUrl, referer)) {
+            FileUploader uploader = new GlobalFileUploader();
+            VirtualFile file = uploader.upload(is, FileUploadType.SIMPLE.getPath(), imgUrl, false);
+            res = file.getFullFilePath();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            throw new GlobalFileException(e.getMessage());
         }
-        return qiniuImgPath;
+        return res;
     }
 
     /**
@@ -56,7 +49,7 @@ public class ImageDownloadUtil {
     @Deprecated
     public static String download(String imgUrl, String referer, String localPath) {
 
-        String fileName = localPath + File.separator + UUID.randomUUID().toString() + "." + getSuffixByUrl(imgUrl);
+        String fileName = localPath + File.separator + UUID.randomUUID().toString() + FileUtil.getSuffixByUrl(imgUrl);
         try (InputStream is = getInputStreamByUrl(imgUrl, referer);
              FileOutputStream fos = new FileOutputStream(fileName)) {
             if (null == is) {
@@ -76,16 +69,6 @@ public class ImageDownloadUtil {
             return null;
         }
         return fileName;
-    }
-
-    private static String getSuffixByUrl(String imgUrl) {
-        String defaultSuffix = "png";
-        if (StringUtils.isEmpty(imgUrl)) {
-            return defaultSuffix;
-        }
-        String temStr = imgUrl.substring(imgUrl.lastIndexOf("/"));
-        int index = temStr.lastIndexOf(".");
-        return -1 == index ? defaultSuffix : temStr.substring(index + 1);
     }
 
     private static InputStream getInputStreamByUrl(String url, String referer) {

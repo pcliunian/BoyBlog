@@ -1,26 +1,4 @@
 /**
- * MIT License
- *
- * Copyright (c) 2018 yadong.zhang
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
  *
  * 评论插件(md版)
  *
@@ -74,13 +52,13 @@ $.extend({
             }, options);
             var commentBox = '<div id="comment-place">'
                     + '<div class="comment-post" id="comment-post" style="position: relative">'
-                    + '<h4 class="bottom-line"><i class="fa fa-commenting-o fa-fw icon"></i><strong>评论</strong></h4>'
+                    + '<h5 class="custom-title"><i class="fa fa-commenting-o fa-fw icon"></i><strong>评论</strong><small></small></h5>'
                     + '<form class="form-horizontal" role="form" id="comment-form">'
                     + '<div class="cancel-reply" id="cancel-reply" style="display: none;"><a href="javascript:void(0);" onclick="$.comment.cancelReply(this)" rel="external nofollow"><i class="fa fa-share"></i>取消回复</a></div>'
                     + '<input type="hidden" name="pid" id="comment-pid" value="0" size="22" tabindex="1">'
                     + '<textarea id="comment_content" class="form-control col-md-7 col-xs-12 valid" style="display: none"></textarea>'
                     + '<textarea name="content" style="display: none"></textarea>'
-                    + '<div style="position: absolute;right: 10px;bottom: 70px;font-size: 14px;font-weight: 700;color: #ececec;z-index: 1;">' + op.wmName + '<br>' + op.wmUrl + '<br>' + op.wmDesc + '</div>'
+                    + '<div style="position: absolute;right: 10px;bottom: 70px;font-size: 14px;color: #dbdada;z-index: 1;">' + op.wmName + '<br>' + op.wmUrl + '<br>' + op.wmDesc + '</div>'
                     + '<a id="comment-form-btn" type="button" data-loading-text="正在提交评论..." class="btn btn-default btn-block">提交评论</a>'
                     + '</form></div></div>';
             $box.html(commentBox);
@@ -126,7 +104,7 @@ $.extend({
                     var commentListBox  = '';
                     if(!commentList){
                         commentListBox = '<div class="commentList">'
-                                + '<h4 class="bottom-line"><i class="fa fa-comments-o fa-fw icon"></i><strong><em>0</em> 条评论</strong></h4>'
+                                + '<h5 class="custom-title"><i class="fa fa-comments-o fa-fw icon"></i><strong>0 评论</strong><small></small></h5>'
                                 + '<ul class="comment">';
                         commentListBox += '<li><div class="list-comment-empty-w fade-in">'
                                 +'<div class="empty-prompt-w">'
@@ -140,7 +118,7 @@ $.extend({
                         // 首次加载-刷新页面后第一次加载，此时没有点击加载更多进行分页
                         if(!pageNumber) {
                             commentListBox = '<div class="commentList">'
-                                    + '<h4 class="bottom-line"><i class="fa fa-comments-o fa-fw icon"></i><strong><em>' + json.data.total + '</em> 条评论</strong></h4>'
+                                    + '<h5 class="custom-title"><i class="fa fa-comments-o fa-fw icon"></i><strong>' + json.data.total + ' 评论</strong><small></small></h5>'
                                     + '<ul class="comment">';
                         }
                         for(var i = 0, len = commentList.length; i < len ; i ++){
@@ -148,7 +126,7 @@ $.extend({
                             var userUrl = comment.url || "javascript:void(0)";
                             var parent = comment.parent;
                             var adminIcon = '';
-                            if(comment.admin){
+                            if(comment.root){
                                 adminIcon = '<img src="/img/author.png" alt="" class="author-icon" title="管理员">';
                             }
                             var parentQuote = parent ? '<a href="#comment-' + parent.id + '" class="comment-quote">@' + parent.nickname + '</a><div style="background-color: #f5f5f5;padding: 5px;margin: 5px;border-radius: 4px;"><i class="fa fa-quote-left"></i><p></p><div style="padding-left: 10px;">' + filterXSS(parent.content) + '</div></div>' : '';
@@ -243,75 +221,81 @@ $.extend({
         submit: function (target) {
             var $this = $(target);
             $this.button('loading');
-            var detail = localStorage.getItem(this.detailKey);
             var data = $("#comment-form").serialize();
-            if(!detail){
-            }else{
-                var detailInfoJson = $.tool.parseFormSerialize(detail);
-                $.comment._detailForm.find("input").each(function () {
+            if(!oauthConfig.loginUserId) {
+                var detail = localStorage.getItem(this.detailKey);
+                if(!detail){
+                }else{
+                    var detailInfoJson = $.tool.parseFormSerialize(detail);
+                    $.comment._detailForm.find("input").each(function () {
+                        var $this = $(this);
+                        var inputName = $this.attr("name");
+                        if(detailInfoJson[inputName]){
+                            $this.val(detailInfoJson[inputName]);
+                        }
+                    });
+                    var $img = $.comment._detailForm.find('img');
+                    $img.attr('src', detailInfoJson.avatar);
+                    $img.removeClass('hide');
+
+                }
+                this._commentDetailModal.modal('show');
+                this._closeBtn.unbind('click');
+                this._closeBtn.click(function () {
+                    setTimeout(function () {
+                        $this.html("<i class='fa fa-close'></i>取消操作...");
+                        setTimeout(function () {
+                            $this.button('reset');
+                        }, 1000);
+                    }, 500);
+                });
+                // 模态框抖动
+                this._commentDetailModal.find('.modal-content').addClass("shake");
+                $.comment._detailForm.find("input[name=qq]").unbind('change');
+                $.comment._detailForm.find("input[name=qq]").change(function () {
                     var $this = $(this);
-                    var inputName = $this.attr("name");
-                    if(detailInfoJson[inputName]){
-                        $this.val(detailInfoJson[inputName]);
+                    var qq = $this.val();
+                    var $nextImg = $this.next('img');
+                    if(qq){
+                        $.ajax({
+                            type: "post",
+                            url: "/api/qq/" + qq,
+                            success: function (json) {
+                                $.alert.ajaxSuccess(json);
+                                var data = json.data;
+                                $.comment._detailForm.find("input").each(function () {
+                                    var $this = $(this);
+                                    var inputName = $this.attr("name");
+                                    if(data[inputName]){
+                                        $this.val(data[inputName]);
+                                    }
+                                });
+                                $nextImg.attr('src', data.avatar);
+                                $nextImg.removeClass('hide');
+                            },
+                            error: $.alert.ajaxError
+                        });
+                    }else{
+                        $nextImg.addClass('hide');
+                    }
+
+                });
+                // 提交评论
+                this._detailFormBtn.unbind('click');
+                this._detailFormBtn.click(function () {
+                    $.comment._detailForm.bootstrapValidator("validate");
+                    if (_form.valid($.comment._detailForm)) {
+                        data = data + "&" + $.comment._detailForm.serialize();
+                        localStorage.setItem($.comment.detailKey, $.comment._detailForm.serialize());
+                        submitForm(data);
                     }
                 });
-                var $img = $.comment._detailForm.find('img');
-                $img.attr('src', detailInfoJson.avatar);
-                $img.removeClass('hide');
-
+            } else {
+                submitForm(data);
             }
-            this._commentDetailModal.modal('show');
-            this._closeBtn.unbind('click');
-            this._closeBtn.click(function () {
-                setTimeout(function () {
-                    $this.html("<i class='fa fa-close'></i>取消操作...");
-                    setTimeout(function () {
-                        $this.button('reset');
-                    }, 1000);
-                }, 500);
-            });
-            // 模态框抖动
-            this._commentDetailModal.find('.modal-content').addClass("shake");
-            $.comment._detailForm.find("input[name=qq]").unbind('change');
-            $.comment._detailForm.find("input[name=qq]").change(function () {
-                var $this = $(this);
-                var qq = $this.val();
-                var $nextImg = $this.next('img');
-                if(qq){
-                    $.ajax({
-                        type: "post",
-                        url: "/api/qq/" + qq,
-                        success: function (json) {
-                            $.alert.ajaxSuccess(json);
-                            var data = json.data;
-                            $.comment._detailForm.find("input").each(function () {
-                                var $this = $(this);
-                                var inputName = $this.attr("name");
-                                if(data[inputName]){
-                                    $this.val(data[inputName]);
-                                }
-                            });
-                            $nextImg.attr('src', data.avatar);
-                            $nextImg.removeClass('hide');
-                        },
-                        error: $.alert.ajaxError
-                    });
-                }else{
-                    $nextImg.addClass('hide');
-                }
 
-            });
 
-            // 提交评论
-            this._detailFormBtn.unbind('click');
-            this._detailFormBtn.click(function () {
-                $.comment._detailForm.bootstrapValidator("validate");
-                if (_form.valid($.comment._detailForm)) {
-                    data = data + "&" + $.comment._detailForm.serialize();
-                    localStorage.setItem($.comment.detailKey, $.comment._detailForm.serialize());
-                    submitForm(data);
-                }
-            });
+
 
             function submitForm(data) {
                 console.log(data);
@@ -321,13 +305,16 @@ $.extend({
                     data: data + '&sid=' + $.comment.sid,
                     success: function (json) {
                         $.alert.ajaxSuccess(json);
+
                         $.comment._commentDetailModal.modal('hide');
 
                         setTimeout(function () {
                             $this.html("<i class='fa fa-check'></i>" + json.message);
                             setTimeout(function () {
                                 $this.button('reset');
-                                window.location.reload();
+                                if (json.status == 200) {
+                                    window.location.reload();
+                                }
                             }, 3000);
                         }, 1000);
                     },

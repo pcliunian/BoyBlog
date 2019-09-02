@@ -1,25 +1,5 @@
+@CHARSET "UTF-8";
 /**
- * MIT License
- *
- * Copyright (c) 2018 yadong.zhang
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
  *
  * 项目页面模板核心CSS
  * @author yadong.zhang (yadong.zhang0415(a)gmail.com)
@@ -2404,6 +2384,9 @@ a.star {
     padding: 3px 0;
     border: 1px solid #EFEFEF
 }
+.editor-statusbar .lines:before {
+    content: ''!important;
+}
 
 .input-group {
     margin-bottom: 10px
@@ -2940,7 +2923,7 @@ ul.timeline li {
     color: #fff !important
 }
 
-.tag:after {
+/*.tag:after {
     content: " ";
     height: 30px;
     width: 0;
@@ -2952,7 +2935,7 @@ ul.timeline li {
     border-top: 14px solid transparent;
     border-bottom: 14px solid transparent;
     border-left: 11px solid #1ABB9C
-}
+}*/
 
 .timeline h2.title {
     position: relative;
@@ -3508,17 +3491,31 @@ ul.project_files li a i {
 }
 
 .thumbnail .image {
-    height: 120px;
+    height: 147px;
     overflow: hidden
 }
 
 .caption {
-    padding: 9px 5px;
+    padding: 5px !important;
     background: #F7F7F7
 }
 
 .caption p {
     margin-bottom: 5px
+}
+
+.caption p span {
+    display: inline-block;
+    width: 88%;
+    white-space: nowrap;
+    word-wrap: normal;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.caption p img {
+    float: right;
+    width: 20px;
 }
 
 .thumbnail {
@@ -3538,12 +3535,13 @@ ul.project_files li a i {
     cursor: pointer
 }
 
-.view .content, .view .mask {
+.view .content, .view .vmask {
     position: absolute;
     width: 100%;
+    height: 100%;
     overflow: hidden;
     top: 0;
-    left: 0
+    left: 0;
 }
 
 .sideways, .view .tools, .view img, .view p {
@@ -3560,10 +3558,13 @@ ul.project_files li a i {
     font-size: 17px;
     padding: 3px;
     background: rgba(0, 0, 0, .35);
-    margin: 43px 0 0
+    /* margin: 69px 0 0; */
+    bottom: 0;
+    position: absolute;
+    width: 100%;
 }
 
-.mask.no-caption .tools {
+.vmask.no-caption .tools {
     margin: 90px 0 0
 }
 
@@ -3577,10 +3578,11 @@ ul.project_files li a i {
 
 .view p {
     font-family: Georgia, serif;
-    font-size: 12px;
+    font-size: 15px;
     color: #fff;
     padding: 10px 20px 20px;
-    text-align: center
+    text-align: center;
+    line-height: 7;
 }
 
 .view a.info {
@@ -3595,9 +3597,9 @@ ul.project_files li a i {
     transition: all .2s linear
 }
 
-.view-first .mask {
+.view-first .vmask {
     opacity: 0;
-    background-color: rgba(0, 0, 0, .5);
+    background-color: rgba(0, 0, 0, .2);
     transition: all .4s ease-in-out
 }
 
@@ -3617,7 +3619,7 @@ ul.project_files li a i {
     transform: scale(1.1)
 }
 
-.view-first:hover .mask {
+.view-first:hover .vmask {
     opacity: 1
 }
 
@@ -3643,8 +3645,52 @@ ul.project_files li a i {
 }
 
 .input-group.date .input-group-addon {
-    border-radius: 0px !important;
+    border-radius: 0 !important;
     background-color: #ffff !important
+}
+
+
+.thumbnail.selected, .thumbnail:hover {
+    -moz-box-shadow:0 0 15px #b5b5b5;
+    -webkit-box-shadow:0 0 15px #b5b5b5;
+    box-shadow:0 0 15px #b5b5b5;
+}
+.thumbnail.selected .selected-mask, .thumbnail:hover  .selected-mask, .material-item.selected .selected-mask {
+    opacity: 1;
+}
+.thumbnail .selected-mask, .material-item .selected-mask {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+.thumbnail .selected-mask.mask-xs, .material-item .selected-mask.mask-xs {
+    width: 95px;
+    height: 95px;
+}
+.thumbnail .selected-mask [class^="icheckbox"] {
+    float: left!important;
+}
+.thumbnail .selected-mask .inner, .material-item .selected-mask .inner {
+    width: 100%;
+    height: 100%;
+    -moz-opacity: .6;
+    -khtml-opacity: .6;
+    opacity: .6;
+    background-color: #000;
+    filter: alpha(opacity=60);
+}
+.thumbnail .selected-mask .icon, .material-item .selected-mask .icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: transparent url(/assets/images/selected_mask.png) no-repeat 0 0;
+    width: 100%;
+    height: 100%;
+    vertical-align: middle;
+    display: inline-block;
+    background-position: 50% 50%;
 }
 
 /*!
@@ -4703,15 +4749,15 @@ ul.notifications {
 }
 
 .table {
-    margin-bottom: 0px !important;
+    margin-bottom: 0 !important;
 }
 
 .pagination {
-    margin: 0px 0;
+    margin: 0 0;
 }
 
 footer {
-    margin-left: 0px !important;
+    margin-left: 0 !important;
 }
 
 .fa-blank-right {
@@ -4770,16 +4816,16 @@ small, .small {
 ul, menu, dir {
     display: block;
     list-style-type: disc;
-    -webkit-margin-before: 0em;
-    -webkit-margin-after: 0em;
-    -webkit-margin-start: 0px;
-    -webkit-margin-end: 0px;
-    -webkit-padding-start: 0px !important;
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-margin-start: 0;
+    -webkit-margin-end: 0;
+    -webkit-padding-start: 0 !important;
 }
 
 .wechat-users li {
     font-size: 25px;
-    padding-right: 0px;
+    padding-right: 0;
 }
 
 .wechat-users li img {
@@ -4812,50 +4858,13 @@ ul, menu, dir {
 }
 
 .option-img:hover {
-    -webkit-box-shadow: 0px 0px 18px #888888;
-    -moz-box-shadow: 0px 0px 18px #888888;
-    box-shadow: 0px 0px 18px #888888;
-}
-
-.chooseImg {
-    background: url("/assets/images/chooseImg_N.png");
-    display: block;
-    width: 65px;
-    height: 65px;
-}
-
-.chooseImg:hover {
-    background: url("/assets/images/chooseImg_S.png");
+    -webkit-box-shadow: 0 0 18px #888888;
+    -moz-box-shadow: 0 0 18px #888888;
+    box-shadow: 0 0 18px #888888;
 }
 
 .popover {
     max-width: 100% !important;
-}
-
-.upload-wrap {
-    position: relative;
-    width: 60px;
-    height: 60px;
-    line-height: 80px;
-    overflow: hidden;
-    margin-right: 5px;
-    border: 1px dashed #cacbcc;
-    display: inline-block;
-    text-align: center;
-    background: url('/assets/images/upload.png') -6px -1px no-repeat;
-}
-
-.upload-wrap input[type=file], .upload-wrap button {
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 0;
-    width: 100%;
-    height: 100%;
-    outline: 0;
-    opacity: 0;
-    filter: alpha(opacity=0);
-    cursor: pointer;
 }
 
 .lately span {
@@ -4874,7 +4883,7 @@ ul, menu, dir {
 
 .radio label, .checkbox label {
     min-height: 20px;
-    padding-left: 0px;
+    padding-left: 0;
     margin-bottom: 0;
     font-weight: 400;
     cursor: pointer;
@@ -4887,7 +4896,7 @@ ul, menu, dir {
 
 ::-webkit-scrollbar-thumb {
     width: 10px;
-    border: 0px solid #000;
+    border: 0 solid #000;
     background: #cbcbcb;
 }
 
@@ -4896,43 +4905,95 @@ ul, menu, dir {
     background-color: #f5f5f5;
 }
 
+
+
+.chooseImgModal, #chooseImgModal {
+    z-index: 9999;
+}
+.chooseImgModal .material-status, #chooseImgModal .material-status {
+    line-height: 3;
+    color: #333
+}
+
+.chooseImgModal .material-box::-webkit-scrollbar {
+    margin-right: 2px;
+    width: 5px;
+}
+
+.chooseImgModal .material-box::-webkit-scrollbar-thumb {
+    width: 5px;
+    border: 0 solid #000;
+    background: #cbcbcb;
+}
+
+.chooseImgModal .material-box::-webkit-scrollbar-track-piece {
+    border-left: 0 solid #d2d2d2;
+    background-color: #f5f5f5;
+}
+
 .material-box {
-    min-height: 250px;
-    height: 250px;
+    max-height: 325px;
+    min-height: 215px;
+    /*height: 250px;*/
     overflow-y: scroll;
 }
 
-.material-box ul li {
+.material-box ul li.material-item {
     border: 1px solid #ddd;
-    -webkit-transition: border .2s ease-in-out;
-    -o-transition: border .2s ease-in-out;
-    transition: border .2s ease-in-out;
+    /*-webkit-transition: border .2s ease-in-out;*/
+    /*-o-transition: border .2s ease-in-out;*/
+    /*transition: border .2s ease-in-out;*/
     float: left;
-    width: 120px;
-    height: 120px;
-    margin: 5px;
+    width: 96px;
+    height: 96px;
+    margin: 7px;
 }
 
-.material-box ul li:hover {
+.material-box ul li.material-item:hover {
     -moz-box-shadow: 2px 2px 5px #cbd0d6;
     -webkit-box-shadow: 2px 2px 5px #cbd0d6;
     box-shadow: 2px 2px 5px #cbd0d6;
 }
 
-.material-box ul li.active {
+.material-box ul li.material-item.active {
     -moz-box-shadow: 2px 2px 5px #cbd0d6;
     -webkit-box-shadow: 2px 2px 5px #cbd0d6;
     box-shadow: 2px 2px 5px #cbd0d6;
 }
 
-.material-box ul li img {
-    transition: all .2s linear;
-    width: 100px;
-    max-height: 100px;
+.material-box ul li.material-item img {
+    /*transition: all .2s linear;*/
+    width: 100%;
+    max-height: 95px;
 }
 
-.material-box ul li:hover img {
-    transform: scale(1.1);
+.material-box ul li.material-item:hover img {
+    /*transform: scale(1.1);*/
+}
+
+.material-box ul li.material-page {
+    width: 100%;
+    height: 38px;
+    border: 0 solid #ddd;
+    text-align: right;
+    padding-right: 15px;
+    padding-top: 5px;
+    float: right;
+}
+
+.material-box ul li.material-page .material-page-body {
+    width: 100%;
+    height: 100%;
+}
+
+.material-box ul li.material-page .material-page-body a, .material-box ul li.material-page .material-page-body input {
+    display: inline-block
+}
+
+.material-box ul li.material-page .material-page-body input {
+    width: 50px;
+    position: relative;
+    top: -2px;
 }
 
 .preview img {
@@ -4942,7 +5003,6 @@ ul, menu, dir {
 }
 
 /* wangEditor fullscreen */
-@CHARSET "UTF-8";
 
 .w-e-toolbar {
     flex-wrap: wrap;
@@ -4961,8 +5021,8 @@ ul, menu, dir {
     position: fixed !important;
     width: 100% !important;
     height: 100% !important;
-    left: 0px !important;
-    top: 0px !important;
+    left: 0 !important;
+    top: 0 !important;
     background-color: white;
     z-index: 9999;
 }
@@ -4992,3 +5052,119 @@ ul, menu, dir {
 }
 
 /* 重写ztree样式，修复选择框上出现阴影的问题 */
+
+#spider-message {
+    display: block;
+    font-size: 12px;
+    font-weight: 300;
+}
+
+#spider-message p {
+    margin: 0 0 2px;
+}
+
+.control-label .required {
+    color: #dc3545;
+}
+
+.fixed-radio-checkbox {
+    position: relative;
+    top: 7px;
+}
+
+/* 滚条消息通知 */
+.notify {
+    float: left;
+    color: #666;
+    margin-right: 8px;
+    margin-top: 3px;
+}
+.notify i {
+    color: #5cb85c;
+    font-size: 15px;
+}
+.scrolltext {
+    height: 25px;
+    line-height: 25px;
+    overflow: hidden;
+}
+.scrolltext ul {
+    margin-top: 0;
+    list-style: none;
+}
+.scrolltext-title {
+    white-space: nowrap;
+    word-wrap: normal;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+/* 滚条消息通知 */
+
+.bootstrap-tagsinput.focus{
+    border-color: #3c763d;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+}
+
+.tags-list li{
+    display: block;
+    float: left;
+    margin: 5px 5px 0 0;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #545c63;
+    line-height: 16px;
+    background: rgba(84,92,99,.1);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    color: #555;
+    border-radius: 3px;
+    z-index: 9999;
+}
+
+.mask .masker {
+    position: relative;
+    width: 30px;
+}
+
+.mask .masker i {
+    font-size: 30px;
+    font-weight: 400;
+}
+.mask .text {
+    font-size: 24px;
+    margin-top: 10px;
+}
+.mask.lock {
+    cursor: not-allowed;
+    background-color: #eee;
+    opacity: 1;
+}
+.mask.load {
+}
+
+.pointer {
+    cursor: pointer;
+}

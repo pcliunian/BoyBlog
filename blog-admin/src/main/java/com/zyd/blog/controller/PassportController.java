@@ -3,6 +3,7 @@ package com.zyd.blog.controller;
 import com.zyd.blog.business.annotation.BussinessLog;
 import com.zyd.blog.business.entity.UserPwd;
 import com.zyd.blog.business.service.SysUserService;
+import com.zyd.blog.framework.holder.RequestHolder;
 import com.zyd.blog.framework.object.ResponseVO;
 import com.zyd.blog.framework.property.AppProperties;
 import com.zyd.blog.util.ResultUtil;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.web.util.SavedRequest;
+import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,6 +60,7 @@ public class PassportController {
      * @param password
      * @return
      */
+    @BussinessLog("[{1}]登录系统")
     @PostMapping("/signin")
     @ResponseBody
     public ResponseVO submitLogin(String username, String password, boolean rememberMe, String kaptcha) {
@@ -74,9 +78,16 @@ public class PassportController {
             // 每个Realm都能在必要时对提交的AuthenticationTokens作出反应
             // 所以这一步在调用login(token)方法时,它会走到xxRealm.doGetAuthenticationInfo()方法中,具体验证方式详见此方法
             currentUser.login(token);
-            return ResultUtil.success("登录成功！");
+            SavedRequest savedRequest = WebUtils.getSavedRequest(RequestHolder.getRequest());
+            String historyUrl = null;
+            if(null != savedRequest) {
+                if(!savedRequest.getMethod().equals("POST")) {
+                    historyUrl = savedRequest.getRequestUrl();
+                }
+            }
+            return ResultUtil.success(null, historyUrl);
         } catch (Exception e) {
-            log.error("登录失败，用户名[{}]", username, e);
+            log.error("登录失败，用户名[{}]：{}", username, e.getMessage());
             token.clear();
             return ResultUtil.error(e.getMessage());
         }
@@ -87,6 +98,7 @@ public class PassportController {
      *
      * @return
      */
+    @BussinessLog("修改密码")
     @PostMapping("/updatePwd")
     @ResponseBody
     public ResponseVO updatePwd(@Validated UserPwd userPwd, BindingResult bindingResult) throws Exception {
@@ -104,6 +116,7 @@ public class PassportController {
      * @param redirectAttributes
      * @return
      */
+    @BussinessLog("退出系统")
     @GetMapping("/logout")
     public ModelAndView logout(RedirectAttributes redirectAttributes) {
         // http://www.oschina.net/question/99751_91561

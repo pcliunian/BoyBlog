@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -181,11 +182,11 @@ public class RenderController {
      * @return
      */
     @GetMapping("/article/{articleId}")
-    @BussinessLog(value = "进入文章[{1}]详情页", platform = PlatformEnum.WEB)
+    @BussinessLog(value = "进入文章[{2}]详情页", platform = PlatformEnum.WEB)
     public ModelAndView article(Model model, @PathVariable("articleId") Long articleId) {
         Article article = bizArticleService.getByPrimaryKey(articleId);
         if (article == null || ArticleStatusEnum.UNPUBLISHED.getCode() == article.getStatusEnum().getCode()) {
-            return ResultUtil.redirect("/error/404");
+            return ResultUtil.forward("/error/404");
         }
         model.addAttribute("article", article);
         // 上一篇下一篇

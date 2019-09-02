@@ -4,17 +4,19 @@
     <div class="clearfix"></div>
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
-            <ol class="breadcrumb">
-                <li><a href="/">首页</a></li>
-                <li class="active">评论管理</li>
-            </ol>
+            <@breadcrumb>
+                <ol class="breadcrumb">
+                    <li><a href="/">首页</a></li>
+                    <li class="active">评论管理</li>
+                </ol>
+            </@breadcrumb>
             <div class="x_panel">
                 <div class="x_content">
                     <div class="<#--table-responsive-->">
                         <div class="btn-group hidden-xs" id="toolbar">
                             <@shiro.hasPermission name="comment:batchDelete">
-                                <button id="btn_delete_ids" type="button" class="btn btn-default" title="删除选中">
-                                    <i class="fa fa-trash-o"></i> 批量删除
+                                <button id="btn_delete_ids" type="button" class="btn btn-danger" title="删除选中">
+                                    <i class="fa fa-trash-o fa-fw"></i>
                                 </button>
                             </@shiro.hasPermission>
                         </div>
@@ -120,9 +122,9 @@
             var id = row.id;
             var sid = row.sid;
             var operateBtn = [
-                '<@shiro.hasPermission name="comment:reply"><a class="btn btn-xs btn-primary btn-reply" data-id="' + id + '" data-sid="' + sid + '"><i class="fa fa-edit"></i>回复</a></@shiro.hasPermission>',
-                '<@shiro.hasPermission name="comment:audit"><a class="btn btn-xs btn-warning btn-audit" data-id="' + id + '" data-sid="' + sid + '"><i class="fa fa-edit"></i>审核</a></@shiro.hasPermission>',
-                '<@shiro.hasPermission name="comment:delete"><a class="btn btn-xs btn-danger btn-remove" data-id="' + id + '" data-sid="' + sid + '"><i class="fa fa-trash-o"></i>删除</a></@shiro.hasPermission>'
+                '<@shiro.hasPermission name="comment:reply"><a class="btn btn-primary btn-reply" data-id="' + id + '" data-sid="' + sid + '" title="回复"><i class="fa fa-reply"></i></a></@shiro.hasPermission>',
+                '<@shiro.hasPermission name="comment:audit"><a class="btn btn-warning btn-audit" data-id="' + id + '" data-sid="' + sid + '" title="审核"><i class="fa fa-shield"></i></a></@shiro.hasPermission>',
+                '<@shiro.hasPermission name="comment:delete"><a class="btn btn-danger btn-remove" data-id="' + id + '" data-sid="' + sid + '" title="删除"><i class="fa fa-trash-o fa-fw"></i></a></@shiro.hasPermission>'
             ];
             return operateBtn.join('');
         }
@@ -141,22 +143,22 @@
                     }, {
                         field: 'avatar',
                         title: '作者',
-                        editable: false,
                         width: '200px',
                         formatter: function (code, row, index) {
-                            return '<ul class="list-unstyled" style="max-width: 200px;">' +
-                                    '<li><a href="' + row.url + '" target="_blank"><img src="' + filterXSS(row.avatar) + '" style="width: 20px;border-radius: 50%;position: relative;top: -2px;"/>' + filterXSS(row.nickname) + '</a></li>' +
-                                    '<li>IP: <span style="color: #a9a9a9;">'+row.ip+'</span></li>' +
-                                    '<li>地址: <span style="color: #a9a9a9;">'+row.address+'</span></li>' +
-                                    // '<li>邮箱: <span style="color: #a9a9a9;">'+filterXSS(row.email)+'</span></li>' +
-                                    '<li>设备: <span style="color: #a9a9a9;">'+row.os + ' ' + row.browser +'</span></li>' +
-                                    '<li style="color: #a9a9a9;">'+row.createTimeString+'</li></ul>';
+                            return '<ul class="list-unstyled">' +
+                                    '<li>' +
+                                    '<a href="' + row.url + '" target="_blank"><img src="' + filterXSS(row.avatar) + '" onerror="this.src=\'/assets/images/user.png\'" style="width: 20px;border-radius: 50%;position: relative;top: -2px;"/> ' + filterXSS(row.nickname) + '</a>' +
+                                    '<a href="javascript:void(0);" onclick="window.open(\'tencent://message/?uin=' + row.qq + '&amp;Menu=yes\')" rel="external nofollow" target="_blank"><i class="fa fa-qq fa-fw"></i></a>' +
+                                    '<a href="mailto:' + filterXSS(row.email) + '" rel="external nofollow" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>' +
+                                    '</li>' +
+                                    '<li><i class="fa fa-address-book-o fa-fw"></i> <span style="color: #a9a9a9;">' + row.ip + ' | ' + row.address + '</span></li>' +
+                                    '<li><i class="fa fa-windows fa-fw"></i> <span style="color: #a9a9a9;">' + row.os + ' | ' + row.browser + '</span></li>' +
+                                    '<li><i class="fa fa-clock-o fa-fw"></i> <span style="color: #a9a9a9;">' + row.createTimeString + '</span></li></ul>';
                         }
                     }, {
                         field: 'content',
                         title: '内容',
-                        editable: false,
-                        width: '260px',
+                        width: '380px',
                         formatter: function (code, row, index) {
                             var content = filterXSS(row.content);
                             var source = '<a href="' + appConfig.wwwPath + row.sourceUrl + '" target="_blank">' + row.articleTitle + '</a>';
@@ -169,7 +171,7 @@
                         field: 'support',
                         title: '赞/踩',
                         width: '40px',
-                        editable: false,
+                        align: "center",
                         formatter: function (code, row, index) {
                             return row.support + "/" + row.oppose;
                         }
@@ -177,7 +179,7 @@
                         field: 'status',
                         title: '状态',
                         width: '40px',
-                        editable: false,
+                        align: "center",
                         formatter: function (code, row, index) {
                             var html = '';
                             if(code == 'VERIFYING'){
@@ -194,7 +196,8 @@
                     }, {
                         field: 'operate',
                         title: '操作',
-                        width: '140px',
+                        align: "center",
+                        width: '100px',
                         formatter: operateFormatter //自定义方法，添加操作按钮
                     }
                 ],
@@ -209,12 +212,11 @@
                     return { 'classes': strclass }
                 }
             };
-            //1.初始化Table
-            $.tableUtil.init(options);
-            //2.初始化Button的点击事件
-            $.buttonUtil.init(options);
+            // 初始化table组件
+            var table = new Table(options);
+            table.init();
 
-            var $tablelist = $('#tablelist');
+            var $tablelist = $(table.options.tableBox);
             /**
              * 回复
              */
@@ -223,7 +225,7 @@
                 var $replyForm = $("#replyForm");
                 $replyForm.find("input,select,textarea").each(function () {
                     var $this = $(this);
-                    clearText($this, this.type);
+                    new Table().clearText($this, this.type);
                 });
                 var pid = $this.attr("data-id");
                 var sid = $this.attr("data-sid");
@@ -241,7 +243,7 @@
                             success: function (json) {
                                 $.alert.ajaxSuccess(json);
                                 $("#replyModal").modal('hide');
-                                $.tableUtil.refresh();
+                                table.refresh();
                             },
                             error: $.alert.ajaxError
                         });
@@ -257,7 +259,7 @@
                 var $auditForm = $("#auditForm");
                 $auditForm.find("input,select,textarea").each(function () {
                     var $this = $(this);
-                    clearText($this, this.type);
+                    new Table().clearText($this, this.type);
                 });
                 $("#audit_id").val(userId);
                 $("#audit_sid").val($this.attr("data-sid"));
@@ -274,7 +276,8 @@
                             success: function (json) {
                                 $.alert.ajaxSuccess(json);
                                 $("#auditModal").modal('hide');
-                                $.tableUtil.refresh();
+                                table.refresh();
+                                zhyd.initCommentNotify();
                             },
                             error: $.alert.ajaxError
                         });

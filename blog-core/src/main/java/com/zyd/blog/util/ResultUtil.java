@@ -34,6 +34,10 @@ public class ResultUtil {
         return new ModelAndView("redirect:" + view);
     }
 
+    public static ModelAndView forward(String view) {
+        return new ModelAndView("forward:" + view);
+    }
+
     public static ResponseVO error(int code, String message) {
         return vo(code, message, null);
     }
@@ -48,6 +52,10 @@ public class ResultUtil {
 
     public static ResponseVO success(String message, Object data) {
         return vo(CommonConst.DEFAULT_SUCCESS_CODE, message, data);
+    }
+
+    public static ResponseVO success(Object data) {
+        return vo(ResponseStatus.SUCCESS.getCode(), ResponseStatus.SUCCESS.getMessage(), data);
     }
 
     public static ResponseVO success(String message) {

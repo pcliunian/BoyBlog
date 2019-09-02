@@ -4,12 +4,8 @@ server:
         basedir: /var/tmp/website-blog-web
 # SPRING PROFILES
 spring:
-    datasource:
-        type: com.alibaba.druid.pool.DruidDataSource
-        driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://148.70.5.232:3306/dblog?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true
-        username: root
-        password: root
+    profiles:
+        include: [center-dev]
     # 指定默认MimeMessage的编码，默认为: UTF-8
     mail:
         default-encoding: UTF-8
@@ -20,7 +16,7 @@ spring:
         port: 465
         # 指定SMTP server的用户名.
         username: xxx
-        # 指定SMTP server登陆密码:
+        # 指定SMTP server登录密码:
         password: xxx
         # 指定是否在启动时测试邮件服务器连接，默认为false
         test-connection: false
@@ -35,23 +31,99 @@ spring:
             mail.smtp.connectiontimeout: 50000
             mail.smtp.timeout: 30000
             mail.smtp.writetimeout: 50000
+    # Redis数据库索引（默认为0）
+    redis:
+        jedis:
+            pool:
+                # 连接池最大连接数（使用负值表示没有限制）
+                max-active: 8
+                # 连接池最大阻塞等待时间（使用负值表示没有限制）
+                max-wait: -1ms
+                # 连接池中的最大空闲连接
+                max-idle: 8
+                # 连接池中的最小空闲连接
+                min-idle: 0
+        # 连接超时时间（毫秒）
+        timeout: 5000ms
+        # 默认的数据过期时间，主要用于shiro权限管理
+        expire: 2592000
 
 # logging settings
 logging:
   path: /var/tmp/website-blog-web
 
+# braum过滤器，用于过滤恶意请求
+braum:
+  limit:
+      access:
+          type: redis
+          threshold: 15
+          interval: 5000
+
 ####################################自定义配置##########################################
 app:
     # 是否启用kaptcha验证码
     enableKaptcha: false
-    # 创建网站的时间，用于计算已建站的天数，默认为2018-01-01
-    buildWebsiteDate: 2018-01-01 00:00:00
 
-# braum过滤器，用于过滤恶意请求
-braum:
-    limit:
-        access:
-            type: redis
-            threshold: 15
-            interval: 5000
+me:
+    zhyd:
+        oauth:
+            gitee:
+                clientId:
+                clientSecret:
+                redirectUri:
+            github:
+                clientId:
+                clientSecret:
+                redirectUri:
+            weibo:
+                clientId:
+                clientSecret:
+                redirectUri:
+            dingtalk:
+                clientId:
+                clientSecret:
+                redirectUri:
+            baidu:
+                clientId:
+                clientSecret:
+                redirectUri:
+            coding:
+                clientId:
+                clientSecret:
+                redirectUri:
+            tencentCloud:
+                clientId:
+                clientSecret:
+                redirectUri:
+            oschina:
+                clientId:
+                clientSecret:
+                redirectUri:
+            alipay:
+                clientId:
+                clientSecret:
+                redirectUri:
+                alipayPublicKey:
+            qq:
+                clientId:
+                clientSecret:
+                redirectUri:
+            wechat:
+                clientId:
+                clientSecret:
+                redirectUri:
+            taobao:
+                clientId:
+                clientSecret:
+                redirectUri:
+            google:
+                clientId:
+                clientSecret:
+                redirectUri:
+            facebook:
+                clientId:
+                clientSecret:
+                redirectUri:
+
 ####################################自定义配置##########################################

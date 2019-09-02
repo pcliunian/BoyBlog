@@ -25,20 +25,36 @@
                 </li>
                 <@shiro.hasPermission name="comments">
                 <li role="presentation" class="dropdown">
-                    <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-envelope-o"></i>
-                        <span class="badge bg-green noticeNum">0</span>
-                    </a>
-                    <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
-                        <li>
-                            <div class="text-center">
-                                <a href="/comments">
-                                    <strong>查看所有</strong>
-                                    <i class="fa fa-angle-right"></i>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
+                    <@zhydTag method="getNewCommentInfo" pageSize="50">
+                        <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-envelope-o"></i>
+                            <span class="badge bg-green noticeNum">${getNewCommentInfo['total']}</span>
+                        </a>
+                        <#if getNewCommentInfo['total'] gt 0>
+                            <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
+                                <#list getNewCommentInfo["comments"] as item>
+                                    <li>
+                                        <a href="/comments">
+                                            <span class="image"><img src="${item.avatar}" onerror="this.src='/assets/images/user.png'" alt="user avatar"></span>
+                                            <span>
+                                                <span>${item.nickname}</span>
+                                                <span class="time">${item.createTime?string('yyyy-MM-dd HH:mm:ss')}</span>
+                                            </span>
+                                            <span class="message">点击查看&审核</span>
+                                        </a>
+                                    </li>
+                                </#list>
+                                <li id="event-li">
+                                    <div class="text-center">
+                                        <a href="/comments">
+                                            <strong>立即处理</strong>
+                                            <i class="fa fa-angle-right"></i>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </#if>
+                    </@zhydTag>
                 </li>
                 </@shiro.hasPermission>
                 <li>
@@ -83,41 +99,50 @@
 </div>
 
 <#-- 修改密码Modal -->
-<div class="modal fade" id="updPasswordModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel2">修改密码</h4>
-            </div>
-            <div class="modal-body">
-                <form action="" class="form-horizontal form-label-left" role="form" id="updPassForm">
-                    <input type="hidden" name="id" value="<#if user?exists>${user.id?c}</#if>">
-                    <div class="item form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-3" for="password">旧密码 <span class="required">*</span></label>
-                        <div class="col-md-8 col-sm-8 col-xs-8">
-                            <input class="form-control col-md-7 col-xs-12" id="password" name="password" required="required" type="password" minlength="6" maxlength="15">
+    <div class="modal fade" id="updPasswordModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel2">修改密码</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="" class="form-horizontal form-label-left" role="form" id="updPassForm">
+                        <input type="hidden" name="id" value="<#if user?exists>${user.id?c}</#if>">
+                        <div class="item form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-3" for="password">旧密码 <span
+                                        class="required">*</span></label>
+                            <div class="col-sm-7 col-md-7 col-xs-7">
+                                <input class="form-control" id="oldPassword" name="password" required="required"
+                                       type="password" minlength="6" maxlength="15">
+                            </div>
                         </div>
-                    </div>
-                    <div class="item form-group">
-                        <label for="newPassword" class="control-label col-md-3 col-sm-3 col-xs-3">新密码 <span class="required">*</span></label>
-                        <div class="col-md-8 col-sm-8 col-xs-8">
-                            <input id="newPassword" type="password" name="newPassword" data-validate-length="5,20" class="form-control col-md-7 col-xs-12" required="required" minlength="6" maxlength="15">
+                        <div class="item form-group">
+                            <label for="newPassword" class="control-label col-md-3 col-sm-3 col-xs-3">新密码 <span
+                                        class="required">*</span></label>
+                            <div class="col-sm-7 col-md-7 col-xs-7">
+                                <input id="newPassword" type="password" name="newPassword" data-validate-length="5,20"
+                                       class="form-control" required="required" minlength="6" maxlength="15">
+                            </div>
                         </div>
-                    </div>
-                    <div class="item form-group">
-                        <label for="newPasswordRepeat" class="control-label col-md-3 col-sm-3 col-xs-3">重复新密码 <span class="required">*</span></label>
-                        <div class="col-md-8 col-sm-8 col-xs-8">
-                            <input id="newPasswordRepeat" type="password" name="newPasswordRepeat" data-validate-linked="newPassword" class="form-control col-md-7 col-xs-12" required="required" minlength="6" maxlength="15">
+                        <div class="item form-group">
+                            <label for="newPasswordRepeat" class="control-label col-md-3 col-sm-3 col-xs-3">重复新密码 <span
+                                        class="required">*</span></label>
+                            <div class="col-sm-7 col-md-7 col-xs-7">
+                                <input id="newPasswordRepeat" type="password" name="newPasswordRepeat"
+                                       data-validate-linked="newPassword" class="form-control" required="required"
+                                       minlength="6" maxlength="15">
+                            </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"> 关闭</i></button>
-                <button type="button" class="btn btn-primary" id="updPassBtn">修改密码</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"> 关闭</i>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="updPassBtn">修改密码</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </@shiro.user>

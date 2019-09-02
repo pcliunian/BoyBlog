@@ -6,66 +6,6 @@
  */
 var $publishForm = $("#publishForm");
 
-// 加载所有分类
-function loadType(){
-    $.ajax({
-        type: "post",
-        url: "/type/listAll",
-        success: function (json) {
-            $.alert.ajaxSuccess(json);
-            var data = '';
-            if(data = json.data){
-                var tpl = '<option value="">选择分类</option>{{#data}}<option value="{{id}}">{{name}}</option>{{#nodes}}<option value="{{id}}">  -- {{name}}</option>{{/nodes}}{{/data}}';
-                var html = Mustache.render(tpl, json);
-                $("select#typeId").html(html);
-            }
-            $("#refressType").removeClass("fa-spin");
-            $.alert.showSuccessMessage("分类加载完成！");
-        },
-        error: $.alert.ajaxError
-    });
-}
-
-// 加载所有标签
-function loadTag() {
-    $.ajax({
-        type: "post",
-        url: "/tag/listAll",
-        success: function (json) {
-            $.alert.ajaxSuccess(json);
-            var data = '';
-            if (data = json.data) {
-                var tagHtml = '';
-                for (var i = 0, len = data.length; i < len; i++) {
-                    var tag = data[i];
-                    tagHtml += '<li>'
-                            + '<input type="checkbox" class="square ignore" name="tags" value="' + tag.id + '"> ' + tag.name
-                            + '</li>';
-                }
-                $("#tag-list").html(tagHtml);
-                $("input[type=checkbox], input[type=radio]").iCheck({
-                    checkboxClass: 'icheckbox_square-green',
-                    radioClass: 'iradio_square-green',
-                    increaseArea: '20%' // optional
-                });
-            }
-            $("#refressTag").removeClass("fa-spin");
-            $.alert.showSuccessMessage("标签加载完成！");
-        },
-        error: $.alert.ajaxError
-    });
-}
-$("#refressType").click(function () {
-    $(this).addClass("fa-spin");
-    loadType();
-});
-$("#refressTag").click(function () {
-    $(this).addClass("fa-spin");
-    loadTag();
-});
-loadTag();
-loadType();
-
 if(articleId){
     setTimeout(function () {
         $.ajax({
@@ -74,12 +14,14 @@ if(articleId){
             success: function (json) {
                 $.alert.ajaxSuccess(json);
                 var info = json.data;
-                // 标签
-                var tags = info.tags;
-                for(var i = 0, len = tags.length; i < len ; i ++){
-                    var tag = tags[i];
-                    $("input[name=tags][value=" + tag.id + "]").iCheck('check');
-                }
+                // 标签, 因为标签初始化是有延迟的，所以这而赋值的时候为了防止赋值失败，亦采用延迟处理
+               setTimeout(function () {
+                   var tags = info.tags;
+                   for(var i = 0, len = tags.length; i < len ; i ++){
+                       var tag = tags[i];
+                       $('input[target="tagsinput"]').tagsinput('add', {"id": tag.id, "name": tag.name}, {add: false});
+                   }
+               }, 600);
                 if($('input[name=original]')){
                     $('input[name=original]').iCheck(info.original ? 'check' : 'uncheck');
                 }
@@ -87,7 +29,7 @@ if(articleId){
                     $('#comment').iCheck(info.comment ? 'check' : 'uncheck');
                 }
                 if(info['coverImage']){
-                    $(".coverImage").attr('src', appConfig.qiniuPath + info['coverImage']);
+                    $(".coverImage").attr('src', info['coverImage']);
                 }
                 var contentMd = info['contentMd'];
                 if(contentMd){
@@ -104,7 +46,7 @@ if(articleId){
                     }
                 }
                 $publishForm.find("input[type!=checkbox], select, textarea").each(function () {
-                    clearText($(this), this.type, info);
+                    new Table().clearText($(this), this.type, info);
                 });
             },
             error: $.alert.ajaxError
@@ -112,14 +54,37 @@ if(articleId){
     }, 1000);
 }
 
+$(".to-choose-info").click(function () {
+    if(validator.checkAll($publishForm)) {
+        $("#publishModal").modal('show');
+    }
+});
+
 // 点击保存
 $(".publishBtn").click(function () {
     if(validator.checkAll($publishForm)) {
+        if(!$publishForm.find("input[name='tags']").val()) {
+            $.alert.error("请至少选择一个标签");
+            return;
+        }
+        if(!$("#description").val() || !$("#keywords").val()) {
+            $.alert.error("请填写SEO相关的内容，填写后更容易被收录哦");
+            return;
+        }
+        var isMarkdown = $("input[name=isMarkdown]").val();
+        if(isMarkdown == 1 || isMarkdown == 'true'){
+            $("#contentMd").val(simplemde.value());
+            $("#content").val(simplemde.markdown(simplemde.value()));
+        }
+
         $publishForm.ajaxSubmit({
             type: "post",
             url: "/article/save",
             success: function (json) {
-                $.alert.ajaxSuccessConfirm(json, function () {
+                if(isMarkdown == 1) {
+                    $.tool.delCache("smde_" + op.uniqueId);
+                }
+                $.alert.ajaxSuccess(json, function () {
                     window.location.href = '/articles';
                 });
             },
@@ -128,45 +93,11 @@ $(".publishBtn").click(function () {
     }
 });
 
-var loadImg = false;
-// 选择图片
 $("#file-upload-btn").click(function () {
-    $("#chooseImg").modal('show');
-    if(!loadImg){
-        // 加载素材库
-        $.ajax({
-            type: "post",
-            url: "/api/material",
-            success: function (json) {
-                $.alert.ajaxSuccess(json);
-                loadImg = true;
-                var $box = $(".list-material");
-                var tpl = '{{#data}}<li data-imgUrl="{{.}}"><div class="col-md-55"><img class="lazy-img" data-original="' + appConfig.qiniuPath + '{{.}}" alt="image"></div></li>{{/data}}{{^data}}<li>素材库为空</li>{{/data}}';
-                var html = Mustache.render(tpl, json);
-                $box.html(html);
-                $box.find("li").click(function () {
-                    $box.find("li").each(function () {
-                        $(this).removeClass("active");
-                    });
-                    var $this = $(this);
-                    $this.toggleClass("active");
-                    if($this.hasClass("active")){
-                        var imgUrl = $this.attr("data-imgUrl");
-                        $("#cover-img-input").val(imgUrl);
-                        $(".preview img.coverImage").attr("src", appConfig.qiniuPath + imgUrl);
-                    }
-                });
-                $("img.lazy-img").lazyload({
-                    placeholder : appConfig.staticPath + "/img/loading.gif",
-                    effect: "fadeIn",
-                    threshold: 100
-                });
-
-                $("img.lazy-img").trigger("sporty");
-            },
-            error: $.alert.ajaxError
-        });
-    }
+    $.modal.material.open({multiSelect: false}, function (selectedImageUrl) {
+        $("#cover-img-input").val(selectedImageUrl);
+        $(".preview img.coverImage").attr("src", selectedImageUrl);
+    })
 });
 
 // 选择图片

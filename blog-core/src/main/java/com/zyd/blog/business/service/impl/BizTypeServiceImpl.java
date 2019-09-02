@@ -5,7 +5,10 @@ import com.github.pagehelper.PageInfo;
 import com.zyd.blog.business.entity.Type;
 import com.zyd.blog.business.service.BizTypeService;
 import com.zyd.blog.business.vo.TypeConditionVO;
+import com.zyd.blog.framework.exception.ZhydException;
+import com.zyd.blog.persistence.beans.BizArticle;
 import com.zyd.blog.persistence.beans.BizType;
+import com.zyd.blog.persistence.mapper.BizArticleMapper;
 import com.zyd.blog.persistence.mapper.BizTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,13 +34,9 @@ public class BizTypeServiceImpl implements BizTypeService {
 
     @Autowired
     private BizTypeMapper bizTypeMapper;
+    @Autowired
+    private BizArticleMapper bizArticleMapper;
 
-    /**
-     * 分页查询
-     *
-     * @param vo
-     * @return
-     */
     @Override
     public PageInfo<Type> findPageBreakByCondition(TypeConditionVO vo) {
         PageHelper.startPage(vo.getPageNumber(), vo.getPageSize());
@@ -76,12 +75,6 @@ public class BizTypeServiceImpl implements BizTypeService {
         return boList;
     }
 
-    /**
-     * 保存一个实体，null的属性不会保存，会使用数据库默认值
-     *
-     * @param entity
-     * @return
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Type insert(Type entity) {
@@ -92,52 +85,27 @@ public class BizTypeServiceImpl implements BizTypeService {
         return entity;
     }
 
-    /**
-     * 根据主键字段进行删除，方法参数必须包含完整的主键属性
-     *
-     * @param primaryKey
-     * @return
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean removeByPrimaryKey(Long primaryKey) {
+
+        BizArticle article = new BizArticle();
+        article.setTypeId(primaryKey);
+        List<BizArticle> articles = bizArticleMapper.select(article);
+        if (!CollectionUtils.isEmpty(articles)) {
+            throw new ZhydException("当前分类下存在文章信息，禁止删除！");
+        }
         return bizTypeMapper.deleteByPrimaryKey(primaryKey) > 0;
     }
 
-    /**
-     * 根据主键更新实体全部字段，null值会被更新
-     *
-     * @param entity
-     * @return
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public boolean update(Type entity) {
-        Assert.notNull(entity, "Type不可为空！");
-        entity.setUpdateTime(new Date());
-        return bizTypeMapper.updateByPrimaryKey(entity.getBizType()) > 0;
-    }
-
-    /**
-     * 根据主键更新属性不为null的值
-     *
-     * @param entity
-     * @return
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateSelective(Type entity) {
         Assert.notNull(entity, "Type不可为空！");
         entity.setUpdateTime(new Date());
-        return bizTypeMapper.updateByPrimaryKeySelective(entity.getBizType()) > 0;
+        return bizTypeMapper.updateByPrimaryKey(entity.getBizType()) > 0;
     }
 
-    /**
-     * 根据主键字段进行查询，方法参数必须包含完整的主键属性，查询条件使用等号
-     *
-     * @param primaryKey
-     * @return
-     */
     @Override
     public Type getByPrimaryKey(Long primaryKey) {
         Assert.notNull(primaryKey, "PrimaryKey不可为空！");
@@ -145,11 +113,6 @@ public class BizTypeServiceImpl implements BizTypeService {
         return null == entity ? null : new Type(entity);
     }
 
-    /**
-     * 查询全部结果，listByEntity(null)方法能达到同样的效果
-     *
-     * @return
-     */
     @Override
     public List<Type> listAll() {
         TypeConditionVO vo = new TypeConditionVO();

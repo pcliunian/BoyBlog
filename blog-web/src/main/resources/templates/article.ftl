@@ -1,38 +1,7 @@
 <#include "include/macros.ftl">
-<@header title="${article.title} | ${config.siteName}"
-    keywords="${article.keywords?if_exists},${config.siteName}"
-    description="${article.description?if_exists}"
-    canonical="/article/${article.id}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2/simplemde.min.css" rel="stylesheet">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css" rel="stylesheet">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-    <style>
-        .CodeMirror {
-            padding: 0px;
-        }
-        .CodeMirror, .CodeMirror-scroll {
-            min-height: 130px;
-            max-height: 200px;
-        }
-        .CodeMirror .cm-spell-error:not(.cm-url):not(.cm-comment):not(.cm-tag):not(.cm-word) {
-            background: none;
-        }
-        .editor-statusbar {
-            display: none;
-        }
-        .editor-preview {
-            overflow-y: initial!important;
-        }
-        ul {
-            list-style: none;
-            margin-left: 0;
-            padding-left: 0;
-        }
-    </style>
-</@header>
-
+<@header title="${article.title} | ${config.siteName}" keywords="${article.keywords?if_exists},${config.siteName}" description="${article.description?if_exists}" canonical="/article/${article.id}" hasEditor=true></@header>
 <#if article.coverImage?exists>
-    <img src="${config.qiuniuBasePath}${article.coverImage?if_exists}" onerror="this.src='${config.staticWebSite}/img/default_article_cover.jpg'" style="display: none;" id="cover-img">
+    <img src="${article.coverImage?if_exists}" onerror="this.src='${config.staticWebSite}/img/default_article_cover.jpg'" style="display: none;" id="cover-img">
 </#if>
 <div class="container custome-container">
     <nav class="breadcrumb">
@@ -41,7 +10,7 @@
         <a href="${config.siteUrl}/type/${article.typeId}" title="点击查看该分类文章" data-toggle="tooltip" data-placement="bottom">${article.type.name}</a>
         <i class="fa fa-angle-right"></i>正文
     </nav>
-    <div class="row">
+    <div class="row article-body">
         <div class="col-sm-8 blog-main">
             <div class="blog-body overflow-initial fade-in">
                 <div class="article-flag">
@@ -58,18 +27,16 @@
                     </#if>
                     <div class="blog-info-meta pull-right">
                         <ul class="list-unstyled list-inline">
-                            <li><i class="fa fa-clock-o fa-fw"></i>发表于 ${article.createTime?string('yyyy年MM月dd日')}</li>
+                            <li><i class="fa fa-clock-o fa-fw"></i>${article.createTime?string('yyyy-MM-dd')}</li>
                             <li><i class="fa fa-eye fa-fw"></i><a class="pointer" data-original-title="${article.lookCount!(0)}人浏览了该文章" data-toggle="tooltip" data-placement="bottom">浏览 (<num>${article.lookCount!(0)}</num>)</a></li>
                             <li><a href="#comment-box" data-original-title="${article.commentCount!(0)}人评论了该文章" data-toggle="tooltip" data-placement="bottom"><i class="fa fa-comments-o fa-fw"></i>评论 (${article.commentCount!(0)})</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="blog-info overflow-initial">
-                    <div class="bottom-line">
-                        <h1 class="blog-info-title">
-                            <strong>${article.title}</strong>
-                        </h1>
-                    </div>
+                    <h1 class="blog-info-title">
+                        <strong>${article.title}</strong>
+                    </h1>
                     <div class="blog-info-body ${article.isMarkdown?string('markdown-body editor-preview-active-side', '')}">
                         ${article.content}
                     </div>
@@ -107,9 +74,13 @@
                     <ul class="list-unstyled">
                         <li>
                             <strong>本文标签：</strong>
-                                <#list article.tags as item>
-                                    <a href="${config.siteUrl}/tag/${item.id?c}" class="c-label" data-original-title="${item.name}" data-toggle="tooltip" data-placement="bottom" target="_blank">${item.name}</a>
-                                </#list>
+                                <#if article.tags?? && article.tags?size gt 0>
+                                    <#list article.tags as item>
+                                        <a href="${config.siteUrl}/tag/${item.id?c}" class="c-label" data-original-title="${item.name}" data-toggle="tooltip" data-placement="bottom" target="_blank">${item.name}</a>
+                                    </#list>
+                                <#else>
+                                    <a href="javascript:;;" class="c-label" data-original-title="暂无相关标签" data-toggle="tooltip" data-placement="bottom" target="_blank">暂无相关标签</a>
+                                </#if>
                         </li>
                         <li>
                             <strong>版权声明：</strong>
@@ -124,13 +95,13 @@
             </div>
             <div class="blog-body">
                 <a href="https://promotion.aliyun.com/ntms/act/ambassador/sharetouser.html?userCode=wylo59db&utm_source=wylo59db" target="_blank" rel="external nofollow">
-                    <img src="${config.staticWebSite}/img/ad/aliyun_sale1000-60.png" alt="阿里云首购8折" class="img-responsive">
+                    <img src="${config.staticWebSite}/img/ad/aliyun_sale1000-60.png" alt="阿里云首购8折" class="img-responsive" style="width: 100%;">
                 </a>
             </div>
             <div class="blog-body prev-next">
                 <nav class="nav-single wow" data-wow-delay="0.3s">
                     <#if other.prev>
-                        <a href="${config.siteUrl}/article/${other.prev.id}" rel="prev">
+                        <a href="${config.siteUrl}/article/${other.prev.id?c}" rel="prev">
                             <span class="meta-nav" data-original-title="${other.prev.title}" data-toggle="tooltip" data-placement="bottom"><span class="post-nav"><i class="fa fa-angle-left"></i> 上一篇</span>
                                 <br>${other.prev.title}
                             </span>
@@ -143,7 +114,7 @@
                         </a>
                     </#if>
                     <#if other.next>
-                        <a href="${config.siteUrl}/article/${other.next.id}" rel="next">
+                        <a href="${config.siteUrl}/article/${other.next.id?c}" rel="next">
                             <span class="meta-nav" data-original-title="${other.next.title}" data-toggle="tooltip" data-placement="bottom"><span class="post-nav">下一篇 <i class="fa fa-angle-right"></i></span>
                                 <br>${other.next.title}
                             </span>
@@ -160,7 +131,7 @@
             </div>
             <#-- 热门推荐 -->
             <div class="blog-body clear overflow-initial">
-                <h4 class="bottom-line"><i class="fa fa-fire icon"></i><strong>热门推荐</strong></h4>
+                <h5 class="custom-title"><i class="fa fa-fire fa-fw icon"></i><strong>热门推荐</strong><small></small></h5>
                 <ul class="list-unstyled">
                     <@articleTag method="hotList" pageSize="10">
                         <#if hotList?exists && (hotList?size > 0)>
@@ -169,7 +140,7 @@
                                 <div class="line-container">
                                     <div class="line-left">
                                         <#if item.coverImage?exists>
-                                            <img class="lazy-img" data-original="${config.qiuniuBasePath}${item.coverImage}" width="50" height="50" rel="external nofollow"/>
+                                            <img class="lazy-img" data-original="${item.coverImage}" width="50" height="50" rel="external nofollow"/>
                                         <#else>
                                             <img class="lazy-img" data-original="${config.staticWebSite}/img/favicon.ico" width="50" height="50" rel="external nofollow"/>
                                         </#if>
@@ -201,7 +172,7 @@
             </div>
             <#-- 相关文章 -->
             <div class="blog-body clear overflow-initial">
-                <h4 class="bottom-line"><i class="fa fa-google-wallet icon"></i><strong>相关文章</strong></h4>
+                <h5 class="custom-title"><i class="fa fa-google-wallet fa-fw icon"></i><strong>相关文章</strong><small></small></h5>
                 <ul class="list-unstyled">
                     <#list relatedList as item>
                         <li class="line-li">
@@ -209,7 +180,7 @@
                                 <div class="line-right">
                                     <div class="text">
                                         <a href="${config.siteUrl}/article/${item.id?c}" data-original-title="${item.lookCount?c}人浏览了该文章" data-toggle="tooltip" data-placement="bottom">
-                                            ${item.title}
+                                            <i class="fa fa-book fa-fw"></i>${item.title}
                                         </a>
                                     </div>
                                 </div>
@@ -234,6 +205,16 @@
     </div>
 </div>
 <@footer>
+    <script type="text/javascript">
+        /*
+            百度分享
+            建议改成自己的百度分享js，否则你是没法查看分享的统计结果的。
+         */
+        var bdText = $("#meta_description").attr("content")+" - by ${config.domain}";
+        // 如果文章没有封面图，则取默认的图片
+        var coverImg = $("#cover-img").attr("src") || "${config.staticWebSite}/img/default_article_cover.jpg";
+        window._bd_share_config={"common":{"bdSnsKey":{},"bdText":bdText,"bdMini":"2","bdMiniList":["mshare","qzone","tsina","bdysc","weixin","renren","tqq","kaixin001","tqf","tieba","douban","bdhome","sqq","youdao","sdo","qingbiji","mail","isohu","ty","fbook","twi","linkedin","h163","evernotecn","copy","print"],"bdPic":coverImg,"bdStyle":"1","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+    </script>
     <script src="https://v1.hitokoto.cn/?encode=js&c=d&select=%23hitokoto" defer></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2/simplemde.min.js"></script>

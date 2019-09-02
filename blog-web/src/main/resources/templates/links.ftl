@@ -15,8 +15,7 @@
         <@blogHeader title="友情链接"></@blogHeader>
         <div class="col-sm-12 blog-main">
             <div class="blog-body expansion">
-                <#--<h5 class="legend-title">简单的要求<small> - 简单点，说话的方式简单点</small></h5>-->
-                <h4 class="bottom-line"><i class="fa fa-coffee fa-fw"></i><strong>简单的要求</strong><small> - 简单点，说话的方式简单点</small></h4>
+                <h4 class="custom-title"><i class="fa fa-coffee fa-fw"></i><strong>简单的要求</strong><small> - 简单点，说话的方式简单点</small></h4>
                 <div class="link-info">
                     <ul class="list-unstyled">
                         <li>本站定位：个人技术类博客</li>
@@ -41,13 +40,13 @@
                 <div class="category">
                     <div><i class="fa fa-unlink fa-fw fa-2x"></i>取链记录</div>
                 </div>
-                <div class="col-sm-12 col-md-12" style="margin: 0 auto;float: initial">
+                <div class="col-sm-12 col-md-12" style="margin: 0 auto;float: initial;padding: 0 15px;">
                     <div class="h5"><i class="fa fa-plus-square showContent"> 点击查看</i></div>
                     <div class="disable-content" style="display: none;">
                         <table class="table table-hover table-condensed table-bordered">
                             <thead>
                             <th style="width: 80px;">网站图标</th>
-                            <th style="width: 200px;">网站名</th>
+                            <th style="width: 250px;">网站名</th>
                             <th>取链原因</th>
                             <th style="width: 150px;">取链时间</th>
                             </thead>
